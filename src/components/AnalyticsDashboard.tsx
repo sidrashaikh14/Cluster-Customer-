@@ -123,11 +123,41 @@ const AnalyticsDashboard = ({ data }: AnalyticsDashboardProps) => {
     
     // Perform K-Means clustering (k=5 for meaningful segments)
     const k = Math.min(5, data.length);
-    const clusterResults = normalizedData.length > 0 ? kmeans(normalizedData, k, { maxIterations: 100 }) : null;
+    // Use fixed seed and initialization for stability
+    const clusterResults = normalizedData.length > 0 ? kmeans(normalizedData, k, { 
+      maxIterations: 100,
+      seed: 42, // Fixed seed for reproducibility
+      initialization: 'kmeans++' // More stable initialization method
+    }) : null;
+
+    // Sort clusters by their primary value for consistent ordering
+    const sortClusters = () => {
+      if (!clusterResults || !clusteringData.length) return null;
+
+      const primaryValueFieldIdx = numericFields.findIndex(f => 
+        amountFields.includes(f)
+      );
+
+      // Calculate cluster centers and their average values
+      const clusterValues = Array.from({ length: k }, (_, clusterId) => {
+        const clusterPoints = clusteringData.filter((_, idx) => clusterResults.clusters[idx] === clusterId);
+        const avgValue = primaryValueFieldIdx >= 0 
+          ? clusterPoints.reduce((sum, point) => sum + point[primaryValueFieldIdx], 0) / clusterPoints.length
+          : clusterPoints.length; // If no value field, use size
+        return { clusterId, value: avgValue };
+      });
+
+      // Sort clusters by value (descending)
+      return clusterValues.sort((a, b) => b.value - a.value)
+        .map(({clusterId}) => clusterId);
+    };
+
+    // Get sorted cluster IDs
+    const sortedClusterIds = sortClusters();
     
     // Analyze cluster centroids to generate intelligent segment names
     const generateSegmentNames = () => {
-      if (!clusterResults || numericFields.length === 0) {
+      if (!clusterResults || numericFields.length === 0 || !sortedClusterIds) {
         return Array.from({ length: k }, (_, i) => `Segment ${i + 1}`);
       }
 
@@ -149,8 +179,9 @@ const AnalyticsDashboard = ({ data }: AnalyticsDashboardProps) => {
         amountFields.includes(f)
       );
 
-      // Generate names based on cluster characteristics
-      return clusterStats.map(stat => {
+      // Generate consistent names based on sorted cluster order and characteristics
+      return sortedClusterIds.map(clusterId => {
+        const stat = clusterStats.find(s => s?.clusterId === clusterId);
         if (!stat) return 'Other';
         
         const relativeSize = stat.size / data.length;
@@ -159,22 +190,23 @@ const AnalyticsDashboard = ({ data }: AnalyticsDashboardProps) => {
           const avgValue = stat.avgValues[primaryValueFieldIdx];
           const overallAvg = clusteringData.reduce((sum, point) => sum + point[primaryValueFieldIdx], 0) / clusteringData.length;
           
-          if (avgValue > overallAvg * 1.5) {
-            return relativeSize > 0.15 ? 'High Value' : 'Premium';
-          } else if (avgValue > overallAvg * 0.8) {
-            return relativeSize > 0.25 ? 'Core Customers' : 'Regular';
-          } else if (avgValue > overallAvg * 0.3) {
-            return 'Potential Growth';
+          // Fixed thresholds for more stable categorization
+          if (avgValue > overallAvg * 2.0) {
+            return 'Premium';
+          } else if (avgValue > overallAvg * 1.5) {
+            return 'High Value';
+          } else if (avgValue > overallAvg) {
+            return 'Core';
+          } else if (avgValue > overallAvg * 0.5) {
+            return 'Standard';
           } else {
-            return relativeSize > 0.2 ? 'Entry Level' : 'At Risk';
+            return 'Basic';
           }
         }
         
-        // Fallback naming based on cluster size
-        if (relativeSize > 0.3) return 'Majority Segment';
-        if (relativeSize > 0.2) return 'Significant Group';
-        if (relativeSize > 0.1) return 'Niche Segment';
-        return 'Emerging Group';
+        // Consistent fallback naming based on sorted order
+        const segments = ['Primary', 'Secondary', 'Tertiary', 'Quaternary', 'Auxiliary'];
+        return segments[clusterId] || `Segment ${clusterId + 1}`;
       });
     };
     
