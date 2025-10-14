@@ -37,3 +37,9 @@ jobs:
           publish_dir: ./dist
           cname: cluster # This will create a CNAME file in the gh-pages branch
           destination_dir: cluster # This will deploy to the /cluster subdirectory
+
+      - name: Print deployment URL
+        run: |
+          echo "🚀 Deployment successful!"
+          echo "📝 Your site is deployed at: https://sidrashaikh1407.github.io/cluster/"
+          echo "⏳ Please allow a few minutes for the changes to be visible."
