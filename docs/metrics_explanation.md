@@ -1,24 +1,43 @@
 # Customer Segmentation Dashboard Metrics Documentation
 
-## Key Metrics
+## Key Metrics Overview
+
+The dashboard calculates and displays various metrics that provide insights into customer behavior and business performance. These metrics are calculated in real-time as data is loaded and processed.
 
 ### 1. Total Customers/Users/Records
-- **Description**: Total number of records in the dataset
-- **Calculation**: Simply counts the total number of rows in the data
+- **Description**: Total number of unique customers in the dataset
+- **Business Impact**: Indicates the size of your customer base
+- **Calculation**: Counts total number of rows in the data
+- **Implementation**:
 ```typescript
+// Basic count
 const totalCustomers = data.length;
+
+// With duplicate checking (if needed)
+const uniqueCustomers = new Set(data.map(row => row.email)).size;
+
+// Dynamic label generation based on data type
+const customerLabel = (() => {
+  if (emailField.toLowerCase().includes('customer')) return 'Total Customers';
+  if (emailField.toLowerCase().includes('user')) return 'Total Users';
+  if (emailField.toLowerCase().includes('contact')) return 'Total Contacts';
+  return 'Total Records';
+})();
 ```
-- **Dynamic Labeling**: Label adapts based on the field name (Customers/Users/Contacts/Records)
-```typescript
-customers: emailField.toLowerCase().includes('customer') ? 'Total Customers' : 
-          emailField.toLowerCase().includes('user') ? 'Total Users' :
-          emailField.toLowerCase().includes('contact') ? 'Total Contacts' : 'Total Records'
-```
+- **Visualization**: Displayed as a card with Users icon
+- **Key Performance Indicators**:
+  - Growth Rate = (Current Period Count - Previous Period Count) / Previous Period Count
+  - Customer Retention = Returning Customers / Total Customers
 
 ### 2. Total Revenue/Sales/Value
-- **Description**: Sum of all monetary values in the dataset
-- **Calculation**: Identifies amount-related fields and sums their values
+- **Description**: Aggregate monetary value from all customer transactions
+- **Business Impact**: Key indicator of business performance and growth
+- **Components**:
+  - Direct Revenue: Sum of all transaction amounts
+  - Projected Revenue: Including customer lifetime value projections
+- **Implementation**:
 ```typescript
+// Field detection for flexible schema support
 const amountFields = fields.filter(f => 
   f.toLowerCase().includes('amount') || 
   f.toLowerCase().includes('revenue') || 
@@ -26,34 +45,155 @@ const amountFields = fields.filter(f =>
   f.toLowerCase().includes('total')
 );
 
-const totalRevenue = amountFields.length > 0 
-  ? data.reduce((sum, customer) => {
+// Revenue calculation with error handling
+const calculateTotalRevenue = () => {
+  if (!amountFields.length) return 0;
+  
+  try {
+    return data.reduce((sum, customer) => {
       const amount = parseFloat(customer[amountFields[0]]) || 0;
-      return sum + amount;
-    }, 0)
-  : 0;
-```
+      // Validate amount is positive
+      return sum + (amount >= 0 ? amount : 0);
+    }, 0);
+  } catch (error) {
+    console.error('Error calculating revenue:', error);
+    return 0;
+  }
+};
 
-### 3. Average Order Value
-- **Description**: Average monetary value per customer
-- **Calculation**: Total revenue divided by total number of customers
-```typescript
-avgOrderValue: totalRevenue / totalCustomers || 0
+const totalRevenue = calculateTotalRevenue();
+const formattedRevenue = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD'
+}).format(totalRevenue);
 ```
-- **Dynamic Labeling**: Adapts based on the field name (Revenue/Sales/Order/Value)
-```typescript
-avgOrder: amountFields.length > 0 ?
-         amountFields[0].toLowerCase().includes('revenue') ? 'Avg Revenue' :
-         amountFields[0].toLowerCase().includes('sales') ? 'Avg Sale Value' :
-         amountFields[0].toLowerCase().includes('order') ? 'Avg Order Value' : 'Avg Value' : 'Avg Value'
-```
+- **Visualization**: 
+  - Card display with DollarSign icon
+  - Monthly trend line in charts
+- **Key Performance Indicators**:
+  - Revenue Growth Rate = (Current Period Revenue - Previous Period Revenue) / Previous Period Revenue
+  - Average Revenue per Customer = Total Revenue / Total Customers
+  - Revenue Distribution by Segment
 
-### 4. Top Segment
-- **Description**: The customer segment with the highest number of customers
-- **Calculation**: Determined by sorting segments by size and taking the first one
+### 3. Average Order Value (AOV)
+- **Description**: Average monetary value per customer transaction
+- **Business Impact**: 
+  - Indicates customer spending patterns
+  - Helps in pricing strategy
+  - Benchmark for customer segments
+- **Implementation**:
 ```typescript
-topSegment: segmentData.sort((a, b) => b.value - a.value)[0]?.name || 'Champions'
+// Basic AOV calculation
+const calculateAOV = () => {
+  if (!totalCustomers || !totalRevenue) return 0;
+  return totalRevenue / totalCustomers;
+};
+
+// Advanced AOV with segment analysis
+const calculateSegmentAOV = (segment: CustomerSegment) => {
+  const segmentCustomers = customerSegments.filter(c => c.segment === segment);
+  const segmentRevenue = segmentCustomers.reduce((sum, c) => sum + c.monetary, 0);
+  return segmentRevenue / segmentCustomers.length || 0;
+};
+
+// Dynamic label generation
+const getAOVLabel = () => {
+  if (!amountFields.length) return 'Avg Value';
+  const field = amountFields[0].toLowerCase();
+  
+  switch (true) {
+    case field.includes('revenue'): return 'Avg Revenue';
+    case field.includes('sales'): return 'Avg Sale Value';
+    case field.includes('order'): return 'Avg Order Value';
+    default: return 'Avg Value';
+  }
+};
+
+const aov = calculateAOV();
+const formattedAOV = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+}).format(aov);
 ```
+- **Visualization**:
+  - Card display with Target icon
+  - Segment comparison chart
+- **Key Performance Indicators**:
+  - AOV Growth Rate
+  - AOV by Segment
+  - AOV Distribution Analysis
+- **Benchmarking**:
+  - Premium Segment: > 200% of overall AOV
+  - Core Segment: 80-200% of overall AOV
+  - Entry Level: < 80% of overall AOV
+
+### 4. Customer Segments and Top Segment Analysis
+- **Description**: Advanced customer categorization using K-means clustering
+- **Business Impact**: 
+  - Customer behavior understanding
+  - Targeted marketing opportunities
+  - Resource allocation optimization
+- **Segmentation Process**:
+  1. Feature Selection
+  2. Data Normalization
+  3. K-means Clustering
+  4. Segment Naming
+  5. Distribution Analysis
+- **Implementation**:
+```typescript
+// Feature selection for clustering
+const getClusteringFeatures = (data: Customer[]) => {
+  return data.map(customer => ([
+    normalizeValue(customer.total_amount),
+    normalizeValue(customer.purchase_frequency),
+    normalizeValue(customer.avg_order_value),
+    normalizeValue(90 - customer.days_since_last_purchase) // Inverse for recency
+  ]));
+};
+
+// Segment naming logic
+const generateSegmentName = (
+  avgValue: number, 
+  overallAvg: number, 
+  relativeSize: number
+): string => {
+  if (avgValue > overallAvg * 1.5) {
+    return relativeSize > 0.15 ? 'High Value' : 'Premium';
+  } else if (avgValue > overallAvg * 0.8) {
+    return relativeSize > 0.25 ? 'Core Customers' : 'Regular';
+  } else if (avgValue > overallAvg * 0.3) {
+    return 'Potential Growth';
+  }
+  return relativeSize > 0.2 ? 'Entry Level' : 'At Risk';
+};
+
+// Top segment calculation
+const getTopSegment = (segments: SegmentData[]): string => {
+  return segments
+    .sort((a, b) => b.value - a.value)[0]?.name 
+    || 'Champions';
+};
+
+// Segment metrics
+const segmentMetrics = {
+  totalValue: segments.reduce((sum, s) => sum + s.value, 0),
+  averageSize: segments.reduce((sum, s) => sum + s.value, 0) / segments.length,
+  distribution: segments.map(s => ({
+    name: s.name,
+    percentage: (s.value / totalCustomers) * 100
+  }))
+};
+```
+- **Visualization**:
+  - Pie Chart for segment distribution
+  - Scatter Plot for cluster visualization
+  - Segment metrics cards
+- **Key Performance Indicators**:
+  - Segment Size Distribution
+  - Segment Value Contribution
+  - Segment Growth Rate
+  - Inter-segment Movement
 
 ## Customer Segmentation Analysis
 
