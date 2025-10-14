@@ -35,3 +35,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          cname: cluster # This will create a CNAME file in the gh-pages branch
+          destination_dir: cluster # This will deploy to the /cluster subdirectory

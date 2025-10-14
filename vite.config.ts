@@ -4,7 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/Cluster/',
+  base: mode === 'development' ? '/' : '/cluster/',
   server: {
     host: "::",
     port: 8080,
