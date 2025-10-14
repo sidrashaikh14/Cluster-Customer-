@@ -73,31 +73,37 @@
 
 ## Data Generation Guidelines
 
-### 1. Value Ranges for Segmentation
+### 1. Value Ranges for Fixed Segmentation
 
-For effective customer segmentation, distribute your data across these ranges:
+For consistent and stable customer segmentation, the following fixed thresholds are used (relative to overall average):
 
-#### Premium Customers (15-20% of dataset)
-- total_amount: > 5000.00
-- purchase_frequency: > 24
-- avg_order_value: > 200.00
+#### Premium Customers (>200% of average)
+- total_amount: > 6000.00
+- purchase_frequency: > 30
+- avg_order_value: > 250.00
 - days_since_last_purchase: < 15
 
-#### Core Customers (40-50% of dataset)
-- total_amount: 2000.00 - 5000.00
-- purchase_frequency: 12-24
-- avg_order_value: 150.00 - 200.00
-- days_since_last_purchase: 15-45
+#### High Value Customers (150-200% of average)
+- total_amount: 4500.00 - 6000.00
+- purchase_frequency: 24-30
+- avg_order_value: 200.00 - 250.00
+- days_since_last_purchase: 15-30
 
-#### Entry Level (20-25% of dataset)
-- total_amount: 1000.00 - 2000.00
-- purchase_frequency: 6-12
+#### Core Customers (100-150% of average)
+- total_amount: 3000.00 - 4500.00
+- purchase_frequency: 18-24
+- avg_order_value: 150.00 - 200.00
+- days_since_last_purchase: 30-45
+
+#### Standard Customers (50-100% of average)
+- total_amount: 1500.00 - 3000.00
+- purchase_frequency: 12-18
 - avg_order_value: 100.00 - 150.00
 - days_since_last_purchase: 45-60
 
-#### At Risk (10-15% of dataset)
-- total_amount: < 1000.00
-- purchase_frequency: < 6
+#### Basic Customers (<50% of average)
+- total_amount: < 1500.00
+- purchase_frequency: < 12
 - avg_order_value: < 100.00
 - days_since_last_purchase: > 60
 

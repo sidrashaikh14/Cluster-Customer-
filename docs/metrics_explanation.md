@@ -129,43 +129,49 @@ const formattedAOV = new Intl.NumberFormat('en-US', {
   - Entry Level: < 80% of overall AOV
 
 ### 4. Customer Segments and Top Segment Analysis
-- **Description**: Advanced customer categorization using K-means clustering
+- **Description**: Stable customer segmentation using fixed thresholds and seeded K-means clustering
 - **Business Impact**: 
-  - Customer behavior understanding
-  - Targeted marketing opportunities
-  - Resource allocation optimization
-- **Segmentation Process**:
+  - Consistent customer segmentation across time periods
+  - Reliable trend tracking and comparison
+  - Predictable segment transitions
+  - Better long-term customer journey analysis
+- **Stable Segmentation Process**:
   1. Feature Selection
   2. Data Normalization
-  3. K-means Clustering
-  4. Segment Naming
-  5. Distribution Analysis
+  3. Seeded K-means Clustering (k=5)
+  4. Fixed Threshold-based Segment Naming
+  5. Consistent Distribution Analysis
 - **Implementation**:
 ```typescript
-// Feature selection for clustering
-const getClusteringFeatures = (data: Customer[]) => {
-  return data.map(customer => ([
-    normalizeValue(customer.total_amount),
-    normalizeValue(customer.purchase_frequency),
-    normalizeValue(customer.avg_order_value),
-    normalizeValue(90 - customer.days_since_last_purchase) // Inverse for recency
-  ]));
+// Fixed clustering configuration for stability
+const CLUSTERING_CONFIG = {
+  k: 5,
+  seed: 42, // Fixed seed for reproducibility
+  initialization: 'kmeans++', // More stable initialization
+  maxIterations: 100
 };
 
-// Segment naming logic
+// Fixed thresholds for segment naming
+const SEGMENT_THRESHOLDS = {
+  PREMIUM: 2.0,    // >200% of average
+  HIGH_VALUE: 1.5, // >150% of average
+  CORE: 1.0,      // >100% of average
+  STANDARD: 0.5,   // >50% of average
+  BASIC: 0        // <50% of average
+};
+
+// Stable segment naming logic based on fixed thresholds
 const generateSegmentName = (
   avgValue: number, 
-  overallAvg: number, 
-  relativeSize: number
+  overallAvg: number
 ): string => {
-  if (avgValue > overallAvg * 1.5) {
-    return relativeSize > 0.15 ? 'High Value' : 'Premium';
-  } else if (avgValue > overallAvg * 0.8) {
-    return relativeSize > 0.25 ? 'Core Customers' : 'Regular';
-  } else if (avgValue > overallAvg * 0.3) {
-    return 'Potential Growth';
-  }
-  return relativeSize > 0.2 ? 'Entry Level' : 'At Risk';
+  const ratio = avgValue / overallAvg;
+  
+  if (ratio > SEGMENT_THRESHOLDS.PREMIUM) return 'Premium';
+  if (ratio > SEGMENT_THRESHOLDS.HIGH_VALUE) return 'High Value';
+  if (ratio > SEGMENT_THRESHOLDS.CORE) return 'Core';
+  if (ratio > SEGMENT_THRESHOLDS.STANDARD) return 'Standard';
+  return 'Basic';
 };
 
 // Top segment calculation
@@ -216,19 +222,30 @@ const segmentMetrics = {
   const clusterResults = normalizedData.length > 0 ? kmeans(normalizedData, k, { maxIterations: 100 }) : null;
   ```
 
-### 2. Segment Names Generation
-- **Logic**: Names are generated based on:
-  1. Average value compared to overall average
-  2. Relative size of segment
+### 2. Stable Segment Names Generation
+- **Logic**: Names are generated based on fixed thresholds relative to the overall average
+- **Benefits**:
+  - Consistent naming across analysis periods
+  - Clear segment boundaries
+  - Predictable customer movement between segments
 ```typescript
-if (avgValue > overallAvg * 1.5) {
-  return relativeSize > 0.15 ? 'High Value' : 'Premium';
-} else if (avgValue > overallAvg * 0.8) {
-  return relativeSize > 0.25 ? 'Core Customers' : 'Regular';
-} else if (avgValue > overallAvg * 0.3) {
-  return 'Potential Growth';
-} else {
-  return relativeSize > 0.2 ? 'Entry Level' : 'At Risk';
+// Fixed thresholds for stable segmentation
+const THRESHOLDS = {
+  PREMIUM: 2.0,    // 200% of average
+  HIGH_VALUE: 1.5, // 150% of average
+  CORE: 1.0,      // 100% of average
+  STANDARD: 0.5,   // 50% of average
+};
+
+// Stable naming logic
+const getSegmentName = (avgValue: number, overallAvg: number): string => {
+  const ratio = avgValue / overallAvg;
+  
+  if (ratio > THRESHOLDS.PREMIUM) return 'Premium';
+  if (ratio > THRESHOLDS.HIGH_VALUE) return 'High Value';
+  if (ratio > THRESHOLDS.CORE) return 'Core';
+  if (ratio > THRESHOLDS.STANDARD) return 'Standard';
+  return 'Basic';
 }
 ```
 
