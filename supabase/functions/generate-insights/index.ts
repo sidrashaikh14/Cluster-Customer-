@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const { segments, metrics, trends, type = "detailed" } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-
+    console.log("openai key", OPENAI_API_KEY);
     if (!OPENAI_API_KEY) {
       throw new Error("OPENAI_API_KEY is not configured");
     }

@@ -3,6 +3,7 @@
 .env.local
 .env.development
 .env.production
+.env.backup
 
 # Logs
 logs
