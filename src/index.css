@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Customer Segmentation Platform Design System
+Professional data analytics theme with modern gradients and visualization-friendly colors.
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Core Background & Foreground */
+    --background: 220 20% 97%;
+    --foreground: 220 13% 18%;
+
+    /* Card System */
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+
+    /* Popover System */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    /* Primary Brand - Deep Professional Blue */
+    --primary: 217 91% 24%;
+    --primary-foreground: 220 20% 97%;
+    --primary-glow: 217 91% 35%;
+
+    /* Secondary - Analytics Purple */
+    --secondary: 252 83% 20%;
+    --secondary-foreground: 220 20% 97%;
+
+    /* Muted Tones */
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    /* Accent - Data Visualization Teal */
+    --accent: 187 85% 45%;
+    --accent-foreground: 220 20% 97%;
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 20% 97%;
+    --success: 142 71% 45%;
+    --warning: 45 93% 58%;
+
+    /* UI Elements */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 35%;
+
+    --radius: 0.75rem;
+
+    /* Data Visualization Colors */
+    --chart-1: 217 91% 35%;
+    --chart-2: 187 85% 45%;
+    --chart-3: 252 83% 35%;
+    --chart-4: 142 71% 45%;
+    --chart-5: 45 93% 58%;
+    --chart-6: 340 75% 55%;
+
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 24%), hsl(217 91% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(252 83% 20%), hsl(252 83% 35%));
+    --gradient-accent: linear-gradient(135deg, hsl(187 85% 45%), hsl(187 85% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 24%) 0%, hsl(252 83% 20%) 50%, hsl(187 85% 45%) 100%);
+
+    /* Shadows & Effects */
+    --shadow-elegant: 0 10px 40px -10px hsl(217 91% 24% / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(217 91% 24% / 0.1);
+    --shadow-glow: 0 0 40px hsl(217 91% 35% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Sidebar */
+    --sidebar-background: 220 20% 98%;
+    --sidebar-foreground: 220 13% 18%;
+    --sidebar-primary: 217 91% 24%;
+    --sidebar-primary-foreground: 220 20% 97%;
+    --sidebar-accent: 220 13% 95%;
+    --sidebar-accent-foreground: 220 13% 18%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 35%;
+  }
+
+  .dark {
+    /* Core Background & Foreground */
+    --background: 220 13% 9%;
+    --foreground: 220 20% 97%;
+
+    /* Card System */
+    --card: 220 13% 12%;
+    --card-foreground: 220 20% 97%;
+
+    /* Popover System */
+    --popover: 220 13% 12%;
+    --popover-foreground: 220 20% 97%;
+
+    /* Primary Brand - Bright for dark mode */
+    --primary: 217 91% 35%;
+    --primary-foreground: 220 20% 97%;
+    --primary-glow: 217 91% 45%;
+
+    /* Secondary - Purple */
+    --secondary: 252 83% 35%;
+    --secondary-foreground: 220 20% 97%;
+
+    /* Muted Tones */
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 65%;
+
+    /* Accent - Teal */
+    --accent: 187 85% 55%;
+    --accent-foreground: 220 13% 9%;
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 20% 97%;
+    --success: 142 71% 45%;
+    --warning: 45 93% 58%;
+
+    /* UI Elements */
+    --border: 220 13% 20%;
+    --input: 220 13% 20%;
+    --ring: 217 91% 45%;
+
+    /* Data Visualization Colors (brighter for dark mode) */
+    --chart-1: 217 91% 45%;
+    --chart-2: 187 85% 55%;
+    --chart-3: 252 83% 45%;
+    --chart-4: 142 71% 55%;
+    --chart-5: 45 93% 68%;
+    --chart-6: 340 75% 65%;
+
+    /* Gradients for dark mode */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 35%), hsl(217 91% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(252 83% 35%), hsl(252 83% 45%));
+    --gradient-accent: linear-gradient(135deg, hsl(187 85% 55%), hsl(187 85% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 35%) 0%, hsl(252 83% 35%) 50%, hsl(187 85% 55%) 100%);
+
+    /* Sidebar */
+    --sidebar-background: 220 13% 8%;
+    --sidebar-foreground: 220 20% 97%;
+    --sidebar-primary: 217 91% 35%;
+    --sidebar-primary-foreground: 220 20% 97%;
+    --sidebar-accent: 220 13% 15%;
+    --sidebar-accent-foreground: 220 20% 97%;
+    --sidebar-border: 220 13% 20%;
+    --sidebar-ring: 217 91% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
